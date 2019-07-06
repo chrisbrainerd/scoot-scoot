@@ -6,13 +6,14 @@ const http = require('http').createServer(app);
 const io = require('socket.io')(http);
 const bikeshareStationsById = require('./bikeshare_stations');
 const PORT = 3003;
-const CHECK_INTERVAL = 5000;
+const CHECK_INTERVAL = 30000;
 
 const PROVIDERS = {
   LIME: "lime",
   BIKESHARE: "bikeshare",
   JUMP: "jump",
   LYFT: "lyft",
+  SPIN: "spin"
 }
 
 const checkBird = () => {
@@ -119,64 +120,75 @@ const checkLyftScooters = () => {
   })
 }
 
+const checkSpinScooters = () => {
+  return new Promise((res, rej) => {
+    fetch('https://web.spin.pm/api/gbfs/v1/washington_dc/free_bike_status')
+    .then(res => res.json())
+    .then(json => {
+      const { bikes } = json.data;
+      const goodScoots = bikes
+        .filter(scoot => !scoot.is_reserved && !scoot.is_disabled && scoot.vehicle_type === "scooter" && scoot.lat && scoot.lon)
+        .map(scoot => ({
+          id: scoot.bike_id,
+          provider: PROVIDERS.SPIN,
+          lat: scoot.lat,
+          lng: scoot.lon,
+          battery: `¯\\_(ツ)_/¯`
+        }));
+      console.log(new Date().toISOString(), `Got info on ${goodScoots.length} scooters from Spin!`);
+      res(goodScoots);
+    })
+    .catch(e => {
+      console.error("Error fetching and munging Spin scooters:", error);
+      rej(null);
+    });
+  })
+}
+
+const corpus = {
+  birdScooters: [],
+  bikeshares: [],
+  jumpBikes: [],
+  lyftScooters: [],
+  spinScooters: []
+}
+
 // BIRD
-let birds = [];
 setInterval(async () => {
-  birds = await checkBird();
+  corpus.birdScooters = await checkBird();
 }, CHECK_INTERVAL);
 
 // CAPITAL BIKESHARE
-let bikeshares = [];
 setInterval(async () => {
-  bikeshares = await checkBikeshare();
+  corpus.bikeshares = await checkBikeshare();
 }, CHECK_INTERVAL);
 
 // JUMP BIKES
-let jumpBikes = [];
 setInterval(async () => {
-  jumpBikes = await checkJumpBikes();
+  corpus.jumpBikes = await checkJumpBikes();
 }, CHECK_INTERVAL);
 
 // LYFT SCOOTERS
-let lyftScooters = [];
 setInterval(async () => {
-  lyftScooters = await checkLyftScooters();
+  corpus.lyftScooters = await checkLyftScooters();
+}, CHECK_INTERVAL);
+
+// SPIN SCOOTERS
+setInterval(async () => {
+  corpus.spinScooters = await checkSpinScooters();
 }, CHECK_INTERVAL);
 
 io.on('connection', function(socket){
   console.log("someone connected :D")
 
-  // BIRD
-  io.emit('bird-update', birds); // emit once on connect
-  const birdInterval = setInterval(() => {
-    io.emit('bird-update', birds);
-  }, CHECK_INTERVAL);
-  
-  // BIKESHARE
-  io.emit('bikeshare-update', bikeshares); // emit once on connect
-  const bikeshareInterval = setInterval(() => {
-    io.emit('bikeshare-update', bikeshares);
-  }, CHECK_INTERVAL);
-  
-  // JUMPBIKES
-  io.emit('jump-bike-update', jumpBikes); // emit once on connect
-  const jumpBikesInterval = setInterval(() => {
-    io.emit('jump-bike-update', jumpBikes);
-  }, CHECK_INTERVAL);
+  io.emit("data-update", corpus);
+  const mainInterval = setInterval(() => {
+    io.emit("data-update", corpus);
+  }, CHECK_INTERVAL)
 
-  // LYFT SCOOTER
-  io.emit('lyft-update', lyftScooters); // emit once on connect
-  const lyftScooterInterval = setInterval(() => {
-    io.emit('lyft-scooter-update', lyftScooters);
-  }, CHECK_INTERVAL);
-
-  // cleanup
   socket.on('disconnect', function(){
     console.log('someone disconnected :(');
-    clearInterval(birdInterval);
-    clearInterval(bikeshareInterval);
-    clearInterval(jumpBikesInterval);
-    clearInterval(lyftScooterInterval);
+    clearInterval(mainInterval);
   });
 });
 

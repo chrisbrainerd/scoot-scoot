@@ -11,8 +11,10 @@ import BirdLogo from './Bird2.png';
 import BikeshareLogo from './Bikeshare.png';
 import JumpLogo from './Jump.jpg';
 import LyftLogo from './lyft.png';
+import SpinLogo from './spin.png';
 
-// import test_bird_data from './../test_bird_data';
+import Filters from './Filters';
+
 require('./Map.less');
 
 let mySvgString = `
@@ -50,6 +52,10 @@ const LyftIcon = new L.Icon({
   iconUrl: LyftLogo,
   iconSize: 30
 })
+const SpinIcon = new L.Icon({
+  iconUrl: SpinLogo,
+  iconSize: 30
+})
 
 const endpoint = "http://localhost:3003";
 
@@ -60,29 +66,22 @@ const MapComponent = ({
   const rect = useRect(wrapperRef);
   const location = useLocation(coords);
 
-  const [birds, setBirds] = useState([])
+  const [birdScooters, setBirdScooters] = useState([])
   const [bikeshares, setBikeshares] = useState([]);
   const [jumpBikes, setJumpBikes] = useState([]);
   const [lyftScooters, setLyftScooters] = useState([]);
+  const [spinScooters, setSpinScooters] = useState([]);
 
   useEffect(() => {
     const socket = io(endpoint);
-    socket.on("bird-update", data => {
-      console.log("received bird data!", data)
-      setBirds(data);
-    });
-    socket.on("bikeshare-update", data => {
-      console.log("received bikeshare data!", data)
-      setBikeshares(data);
-    });
-    socket.on("jump-bike-update", data => {
-      console.log("received jump bike data!", data)
-      setJumpBikes(data);
-    });
-    socket.on("lyft-update", data => {
-      console.log("received lyft scooter data!", data)
-      setLyftScooters(data);
-    });
+    socket.on("data-update", corpus => {
+      console.log('received data update!', corpus);
+        setBirdScooters(corpus.birdScooters);
+        setBikeshares(corpus.bikeshares);
+        setJumpBikes(corpus.jumpBikes);
+        setLyftScooters(corpus.lyftScooters);
+        setSpinScooters(corpus.spinScooters);
+    })
 
     return function cleanup() {
       socket.close();
@@ -91,6 +90,7 @@ const MapComponent = ({
 
   return (
     <div className="map-wrapper" ref={wrapperRef}>
+      <Filters />
       {rect.height && 
         <Map 
           center={location} 
@@ -99,16 +99,15 @@ const MapComponent = ({
           maxZoom={18}
         >
           <TileLayer
-            // url="http://a.tile.stamen.com/toner/{z}/{x}/{y}.png"
             url="https://cartodb-basemaps-{s}.global.ssl.fastly.net/light_all/{z}/{x}/{y}.png"
           />
           <Marker position={location} icon={YouIcon}>
             <Popup>It you</Popup>
           </Marker>
           <MarkerClusterGroup>
-            {birds.map(scooter => (
+            {birdScooters.map(scooter => (
               <Marker key={scooter.id} position={[scooter.lat, scooter.lng]} icon={BirdIcon}>
-                <Popup>Battery: {scooter.battery}%</Popup>
+                <Popup>Battery: {scooter.battery}</Popup>
               </Marker>
             ))}
             {bikeshares.map(bikeStation => (
@@ -123,12 +122,17 @@ const MapComponent = ({
             ))}
             {jumpBikes.map(bike => (
               <Marker key={bike.id} position={[bike.lat, bike.lng]} icon={JumpIcon}>
-                <Popup>Battery: {bike.battery}%</Popup>
+                <Popup>Battery: {bike.battery}</Popup>
               </Marker>
             ))}
             {lyftScooters.map(scooter => (
               <Marker key={scooter.id} position={[scooter.lat, scooter.lng]} icon={LyftIcon}>
-                <Popup>Battery: {scooter.battery}%</Popup>
+                <Popup>Battery: {scooter.battery}</Popup>
+              </Marker>
+            ))}
+            {spinScooters.map(scooter => (
+              <Marker key={scooter.id} position={[scooter.lat, scooter.lng]} icon={SpinIcon}>
+                <Popup>Battery: {scooter.battery}</Popup>
               </Marker>
             ))}
           </MarkerClusterGroup>

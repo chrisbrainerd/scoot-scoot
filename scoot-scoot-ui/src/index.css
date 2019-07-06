@@ -31,3 +31,23 @@ code {
   animation: shadow-pulse 2s infinite;
   border-radius: 100%;
 }
+
+#filters {
+  position: fixed;
+  top: 10px;
+  right: 10px;
+  min-height: 50px;
+  width: 80px;
+  /* border: 2px solid black; */
+  border-radius: 1px;
+  z-index: 999;
+  background-color: #C2948A;
+  color: #28536B;
+}
+
+#fab {
+  position: fixed;
+  top: 10px;
+  z-index: 999;
+  right: 10px;
+}
