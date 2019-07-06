@@ -197,7 +197,8 @@ app.use(express.static(path.join(__dirname, "scoot-scoot-ui", 'build')));
 
 app.get('/', function(req, res){
   console.log('trying to req');
-  res.sendFile(__dirname + '/scoot-scoot-ui/build/index.html');
+  // res.sendFile(__dirname + '/scoot-scoot-ui/build/index.html');
+  res.sendFile(path.join(__dirname + '/scoot-scoot-ui/build/', 'index.html'));
 });
 
 http.listen(process.env.PORT || 5000, () => console.log(`Example app listening on port ${process.env.PORT || 5000}!`));
