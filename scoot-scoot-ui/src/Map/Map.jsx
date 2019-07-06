@@ -59,7 +59,8 @@ const SpinIcon = new L.Icon({
 
 // const protocol = document.location.protocol === "https:" ? "wss:" : "ws:"
 
-const endpoint = 'https://' + document.domain + ':3003';
+// const endpoint = 'https://' + document.domain + ':3003';
+const endpoint = 'https://' + document.domain;
 
 const MapComponent = ({
   coords
