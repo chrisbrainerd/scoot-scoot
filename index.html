@@ -1,0 +1,24 @@
+<!doctype html>
+<html>
+  <head>
+    <script src="/socket.io/socket.io.js"></script>
+    <script src="https://code.jquery.com/jquery-1.11.1.js"></script>
+    <script>
+      document.addEventListener("DOMContentLoaded", function(){
+        // Handler when the DOM is fully loaded
+        var socket = io();
+        socket.on('lime update', function(msg){
+          console.log(msg)
+        });    
+      });
+    </script>
+    
+    <style>
+    </style>
+  </head>
+  <body>
+    <div>
+
+    </div>
+  </body>
+</html>
