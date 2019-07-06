@@ -199,4 +199,4 @@ app.get('/', function(req, res){
   res.sendFile(__dirname + '/scoot-scoot-ui/build/index.html');
 });
 
-http.listen(PORT, () => console.log(`Example app listening on port ${PORT}!`));
+http.listen(process.env.PORT || 5000, () => console.log(`Example app listening on port ${process.env.PORT || 5000}!`));
