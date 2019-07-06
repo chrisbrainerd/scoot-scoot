@@ -84,7 +84,7 @@ const checkJumpBikes = () => {
           lng: bike.lon,
           battery: bike.jump_ebike_battery_level
         }));
-      console.log(new Date().toISOString(), `Got info on ${goodBikes.length} scooters from Bird!`);
+      console.log(new Date().toISOString(), `Got info on ${goodBikes.length} scooters from Jump!`);
       res(goodBikes);
     })
     .catch(e => {
@@ -109,7 +109,7 @@ const checkLyftScooters = () => {
           lng: bike.lon,
           battery: `¯\\_(ツ)_/¯`
         }));
-      console.log(new Date().toISOString(), `Got info on ${goodBikes.length} scooters from Bird!`);
+      console.log(new Date().toISOString(), `Got info on ${goodBikes.length} scooters from Lyft!`);
       res(goodBikes);
     })
     .catch(e => {
