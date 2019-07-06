@@ -57,7 +57,7 @@ const SpinIcon = new L.Icon({
   iconSize: 30
 })
 
-const endpoint = "http://localhost:3003";
+const endpoint = document.location.protocol + '//' + document.domain + ':3003';
 
 const MapComponent = ({
   coords
