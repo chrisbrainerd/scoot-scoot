@@ -143,7 +143,6 @@ const MapComponent = ({ coords }) => {
     showLyftScooters,
     showSpinScooters
   } = filters;
-  console.log(bikeshares[0]);
   return (
     <div className="map-wrapper" ref={wrapperRef}>
       <Filters updateFilters={setFilters} />
