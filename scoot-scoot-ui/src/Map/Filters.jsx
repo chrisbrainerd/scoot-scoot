@@ -194,7 +194,8 @@ const Filters = ({ updateFilters }) => {
                 inputProps={{
                   "aria-label": "minimum charge percentage",
                   min: "0",
-                  max: "100"
+                  max: "100",
+                  step: "1"
                 }}
               />
             </ListItem>

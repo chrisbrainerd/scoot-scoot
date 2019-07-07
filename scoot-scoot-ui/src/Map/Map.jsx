@@ -8,6 +8,11 @@ import {
 } from "react-leaflet";
 import MarkerClusterGroup from "react-leaflet-markercluster";
 import io from "socket.io-client";
+import Card from "@material-ui/core/Card";
+import CardActions from "@material-ui/core/CardActions";
+import CardContent from "@material-ui/core/CardContent";
+import Typography from "@material-ui/core/Typography";
+import Button from "@material-ui/core/Button";
 
 import { geolocated } from "react-geolocated";
 import L from "leaflet";
@@ -22,6 +27,21 @@ import SpinLogo from "./spin.png";
 import Filters from "./Filters";
 
 require("./Map.less");
+const DancingEmoji = () => (
+  <span role="img" aria-label="Dancing emoji">
+    💃
+  </span>
+);
+const ScooterEmoji = () => (
+  <span role="img" aria-label="Scooter emoji">
+    🛴
+  </span>
+);
+const BikeEmoji = () => (
+  <span role="img" aria-label="Bike emoji">
+    🚲
+  </span>
+);
 
 let mySvgString = `
 <svg  height="20" width="20" xmlns="http://www.w3.org/2000/svg">
@@ -123,6 +143,7 @@ const MapComponent = ({ coords }) => {
     showLyftScooters,
     showSpinScooters
   } = filters;
+  console.log(bikeshares[0]);
   return (
     <div className="map-wrapper" ref={wrapperRef}>
       <Filters updateFilters={setFilters} />
@@ -142,9 +163,7 @@ const MapComponent = ({ coords }) => {
           <Marker position={location} icon={YouIcon}>
             <Popup>
               It you
-              <span role="img" aria-label="Dancing emoji">
-                💃
-              </span>
+              <DancingEmoji />
             </Popup>
           </Marker>
           <MarkerClusterGroup>
@@ -157,7 +176,43 @@ const MapComponent = ({ coords }) => {
                       position={[scooter.lat, scooter.lng]}
                       icon={BirdIcon}
                     >
-                      <Popup>Battery: {scooter.battery}</Popup>
+                      <Popup>
+                        <Card>
+                          <CardContent>
+                            <Typography variant="h6" gutterBottom>
+                              <ScooterEmoji /> Bird scooter <ScooterEmoji />
+                            </Typography>
+                            <Typography>Battery: {scooter.battery}%</Typography>
+                            <Typography
+                              color="textSecondary"
+                              variant="caption"
+                              gutterBottom
+                            >
+                              ID: {scooter.id}
+                            </Typography>
+                          </CardContent>
+                          <CardActions>
+                            <Button
+                              onClick={() => {
+                                window.open(
+                                  `https://www.google.com/maps/dir/?api=1&destination=${scooter.lat},${scooter.lng}&dirflg=w`,
+                                  "_blank"
+                                );
+                              }}
+                            >
+                              Navigate here
+                            </Button>
+                            <Button
+                              color="primary"
+                              onClick={() => {
+                                window.open(`https://bird.co`, "_blank");
+                              }}
+                            >
+                              Open app
+                            </Button>
+                          </CardActions>
+                        </Card>
+                      </Popup>
                     </Marker>
                   )
               )}
@@ -169,18 +224,64 @@ const MapComponent = ({ coords }) => {
                   icon={BikeshareIcon}
                 >
                   <Popup>
-                    <p>{bikeStation.name}</p>
-                    <p>
-                      {bikeStation.num_bikes_available} bikes available
-                      {bikeStation.num_bikes_available === 0 && " 😭"}
-                    </p>
-                    <p>
-                      {bikeStation.num_ebikes_available} e-bikes available
-                      {bikeStation.num_bikes_available === 0 && " 😭"}
-                    </p>
-                    <p>
-                      <a href={bikeStation.rental_url}>Rent now</a>
-                    </p>
+                    <Card>
+                      <CardContent>
+                        <Typography variant="h6" gutterBottom>
+                          <BikeEmoji />
+                          Capital Bikeshare
+                          <BikeEmoji />
+                        </Typography>
+                        <Typography
+                          color="textSecondary"
+                          variant="caption"
+                          gutterBottom
+                        >
+                          {bikeStation.name}
+                        </Typography>
+                        <Typography
+                          color="textSecondary"
+                          variant="body1"
+                          gutterBottom
+                        >
+                          {bikeStation.num_bikes_available > 0
+                            ? `bikes: ${"🚲".repeat(
+                                bikeStation.num_bikes_available
+                              )}`
+                            : "bikes: none 😭"}
+                        </Typography>
+                        <Typography
+                          color="textSecondary"
+                          variant="body1"
+                          gutterBottom
+                        >
+                          {bikeStation.num_ebikes_available > 0
+                            ? `e-bikes: ${"🚲".repeat(
+                                bikeStation.num_ebikes_available
+                              )}`
+                            : "ebikes: none 😭"}
+                        </Typography>
+                      </CardContent>
+                      <CardActions>
+                        <Button
+                          onClick={() => {
+                            window.open(
+                              `https://www.google.com/maps/dir/?api=1&destination=${bikeStation.lat},${bikeStation.lon}&dirflg=w`,
+                              "_blank"
+                            );
+                          }}
+                        >
+                          Navigate here
+                        </Button>
+                        <Button
+                          color="primary"
+                          onClick={() => {
+                            window.open(bikeStation.rental_url, "_blank");
+                          }}
+                        >
+                          Reserve in app
+                        </Button>
+                      </CardActions>
+                    </Card>
                   </Popup>
                 </Marker>
               ))}
@@ -193,7 +294,45 @@ const MapComponent = ({ coords }) => {
                       position={[bike.lat, bike.lng]}
                       icon={JumpIcon}
                     >
-                      <Popup>Battery: {bike.battery}</Popup>
+                      <Popup>
+                        <Card>
+                          <CardContent>
+                            <Typography variant="h6" gutterBottom>
+                              <BikeEmoji />
+                              Jump ebike
+                              <BikeEmoji />
+                            </Typography>
+                            <Typography>Battery: {bike.battery}</Typography>
+                            <Typography
+                              color="textSecondary"
+                              variant="caption"
+                              gutterBottom
+                            >
+                              ID: {bike.id}
+                            </Typography>
+                          </CardContent>
+                          <CardActions>
+                            <Button
+                              onClick={() => {
+                                window.open(
+                                  `https://www.google.com/maps/dir/?api=1&destination=${bike.lat},${bike.lng}&dirflg=w`,
+                                  "_blank"
+                                );
+                              }}
+                            >
+                              Navigate here
+                            </Button>
+                            <Button
+                              onClick={() => {
+                                window.open(`https://m.uber.com`, "_blank");
+                              }}
+                              color="primary"
+                            >
+                              Open app
+                            </Button>
+                          </CardActions>
+                        </Card>
+                      </Popup>
                     </Marker>
                   )
               )}
@@ -206,7 +345,47 @@ const MapComponent = ({ coords }) => {
                       position={[scooter.lat, scooter.lng]}
                       icon={LyftIcon}
                     >
-                      <Popup>Battery: {scooter.battery}</Popup>
+                      <Popup>
+                        <Card>
+                          <CardContent>
+                            <Typography variant="h6" gutterBottom>
+                              <ScooterEmoji />
+                              Lyft scooter
+                              <ScooterEmoji />
+                            </Typography>
+                            <Typography>
+                              Battery: {scooter.battery} (Thanks, Lyft!)
+                            </Typography>
+                            <Typography
+                              color="textSecondary"
+                              variant="caption"
+                              gutterBottom
+                            >
+                              ID: {scooter.id}
+                            </Typography>
+                          </CardContent>
+                          <CardActions>
+                            <Button
+                              onClick={() => {
+                                window.open(
+                                  `https://www.google.com/maps/dir/?api=1&destination=${scooter.lat},${scooter.lng}&dirflg=w`,
+                                  "_blank"
+                                );
+                              }}
+                            >
+                              Navigate here
+                            </Button>
+                            <Button
+                              onClick={() => {
+                                window.open(`https://lyft.com`, "_blank");
+                              }}
+                              color="primary"
+                            >
+                              Open app
+                            </Button>
+                          </CardActions>
+                        </Card>
+                      </Popup>
                     </Marker>
                   )
               )}
@@ -219,7 +398,45 @@ const MapComponent = ({ coords }) => {
                       position={[scooter.lat, scooter.lng]}
                       icon={SpinIcon}
                     >
-                      <Popup>Battery: {scooter.battery}</Popup>
+                      <Popup>
+                        <Card>
+                          <CardContent>
+                            <Typography variant="h6" gutterBottom>
+                              <ScooterEmoji /> Spin scooter <ScooterEmoji />
+                            </Typography>
+                            <Typography>
+                              Battery: {scooter.battery} (Thanks, Spin!)
+                            </Typography>
+                            <Typography
+                              color="textSecondary"
+                              variant="caption"
+                              gutterBottom
+                            >
+                              ID: {scooter.id}
+                            </Typography>
+                          </CardContent>
+                          <CardActions>
+                            <Button
+                              onClick={() => {
+                                window.open(
+                                  `https://www.google.com/maps/dir/?api=1&destination=${scooter.lat},${scooter.lng}&dirflg=w`,
+                                  "_blank"
+                                );
+                              }}
+                            >
+                              Navigate here
+                            </Button>
+                            <Button
+                              onClick={() => {
+                                window.open(`https://spin.app`, "_blank");
+                              }}
+                              color="primary"
+                            >
+                              Open app
+                            </Button>
+                          </CardActions>
+                        </Card>
+                      </Popup>
                     </Marker>
                   )
               )}
