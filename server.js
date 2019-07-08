@@ -23,7 +23,7 @@ const checkBird = () => {
     .then(json => {
       const { bikes } = json.data;
       const goodScoots = bikes
-        .filter(bike => !bike.reserved && !bike.disabled)
+        .filter(bike => !bike.reserved && !bike.disabled && scoot.lat && scoot.lon)
         .map(scoot => ({
           id: scoot.bike_id,
           provider: PROVIDERS.LIME,
@@ -50,14 +50,14 @@ const checkBikeshare = () => {
       // TODO: pull station list also here, compare last_updated and update as necessary
 
       const stationStatusesById = Object.values(stations.reduce((bigObj, station) => (
-        {
+        station.lat && station.lon ? {
           [station.station_id]: {
             provider: PROVIDERS.BIKESHARE,
             ...bikeshareStationsById[station.station_id],
             ...station,
           },
           ...bigObj
-        }
+        } : bigObj
       ), {}));
 
       console.log(new Date().toISOString(), `Got info on ${stationStatusesById.length} scooters from Capital Bikeshare!`);
@@ -77,7 +77,7 @@ const checkJumpBikes = () => {
     .then(json => {
       const { bikes } = json.data;
       const goodBikes = bikes
-        .filter(bike => !bike.is_reserved && !bike.is_disabled && bike.jump_vehicle_type === "bike")
+        .filter(bike => bike.lat && bike.lon && !bike.is_reserved && !bike.is_disabled && bike.jump_vehicle_type === "bike")
         .map(bike => ({
           id: bike.bike_id,
           provider: PROVIDERS.JUMP,
@@ -102,7 +102,7 @@ const checkLyftScooters = () => {
     .then(json => {
       const { bikes } = json.data;
       const goodBikes = bikes
-        .filter(bike => !bike.is_reserved && !bike.is_disabled && bike.type === "electric_scooter")
+        .filter(bike => bike.lat && bike.lon && !bike.is_reserved && !bike.is_disabled && bike.type === "electric_scooter")
         .map(bike => ({
           id: bike.bike_id,
           provider: PROVIDERS.LYFT,
