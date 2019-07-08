@@ -450,5 +450,5 @@ export default geolocated({
   positionOptions: {
     enableHighAccuracy: true
   },
-  watchPosition: true
+  // watchPosition: true
 })(MapComponent);
